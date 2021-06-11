@@ -32,10 +32,10 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
                 var json = JSON.stringify({event:'touch start', name:this.innerHTML, row:this.row, col:this.col});
                 document.getElementById(this.id).style.backgroundColor = "yellow";
                 if (!connected) {
-                    websock = new WebSocket('ws://' + window.location.hostname + ':81/');
                     setTimeout(function(json) {
                         websock.send(json);
                     }, 200);
+                    window.location.reload();
                 }
                 else {
                     websock.send(json);
@@ -51,10 +51,10 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
                 event.preventDefault();
                 var json = JSON.stringify({event:'touch move', name:this.innerHTML, row:this.row, col:this.col});
                 if (!connected) {
-                    websock = new WebSocket('ws://' + window.location.hostname + ':81/');
                     setTimeout(function(json) {
                         websock.send(json);
                     }, 200);
+                    window.location.reload();
                 }
                 else {
                     websock.send(json);
@@ -134,7 +134,7 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
             }
         </script>
     </head>
-    <body onload="javascript:start();">
+    <body onload="javascript:start();" onresize="window.location.reload();">
         <table id="my_table">
             <!-- Grid goes here -->
         </table>

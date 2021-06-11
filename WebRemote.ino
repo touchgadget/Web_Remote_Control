@@ -209,6 +209,7 @@ void setup()
   if (mdns.begin(HOSTNAME)) {
 #endif  // ESP8266
     Dbg_println(F("MDNS responder started"));
+    mdns.addService("http", "tcp", 80); // Announce esp tcp service on port 8080
   }
 
   // Start web socket server
@@ -223,6 +224,9 @@ void setup()
 
 void loop()
 {
+#if defined(ESP8266)
+  mdns.update();
+#endif
   webSocket.loop();
   server.handleClient();
 }
