@@ -4,7 +4,7 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
     <head>
         <meta charset="UTF-8">
         <meta name = "viewport" content = "width = device-width, initial-scale = 1.0, maximum-scale = 5.0">
-        <title>Media Remote</title>
+        <title>Media Remote 0.11</title>
         <style type="text/css">
             table {
                 position: absolute;

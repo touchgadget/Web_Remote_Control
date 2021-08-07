@@ -22,6 +22,19 @@
    SOFTWARE.
 */
 
+#define DEBUG_ON 0
+#if DEBUG_ON
+#define Dbg_begin(...)  Serial.begin(__VA_ARGS__)
+#define Dbg_print(...)  Serial.print(__VA_ARGS__)
+#define Dbg_println(...)  Serial.println(__VA_ARGS__)
+#define Dbg_printf(...)  Serial.printf(__VA_ARGS__)
+#else
+#define Dbg_begin(...)
+#define Dbg_print(...)
+#define Dbg_println(...)
+#define Dbg_printf(...)
+#endif
+
 #define ARDUINOJSON_USE_LONG_LONG 1
 #include <ArduinoJson.h>
 #if defined(ESP8266)
@@ -56,19 +69,6 @@ WiFiManager wifiManager;
 
 // ESP GPIO pin to use. Recommended: 4 (D2).
 IRsend irsend(4); // Set the GPIO to be used to sending the message.
-
-#define DEBUG_ON 0
-#if DEBUG_ON
-#define Dbg_begin(...)  Serial.begin(__VA_ARGS__)
-#define Dbg_print(...)  Serial.print(__VA_ARGS__)
-#define Dbg_println(...)  Serial.println(__VA_ARGS__)
-#define Dbg_printf(...)  Serial.printf(__VA_ARGS__)
-#else
-#define Dbg_begin(...)
-#define Dbg_print(...)
-#define Dbg_println(...)
-#define Dbg_printf(...)
-#endif
 
 #define HOSTNAME "WebRemote"
 
@@ -209,7 +209,8 @@ void setup()
   if (mdns.begin(HOSTNAME)) {
 #endif  // ESP8266
     Dbg_println(F("MDNS responder started"));
-    mdns.addService("http", "tcp", 80); // Announce esp tcp service on port 8080
+    mdns.addService("http", "tcp", 80); // Announce http tcp service on port 80
+    mdns.addService("ws", "tcp", 81); // Announce web sock tcp service on port 81
   }
 
   // Start web socket server
