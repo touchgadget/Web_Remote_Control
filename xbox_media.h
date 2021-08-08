@@ -1,5 +1,9 @@
 // Set member alignment to 1. No pad bytes between members.
 #pragma pack(push, 1)
+
+#define WALL_POWER_ON   (enum decode_type_t)200
+#define WALL_POWER_OFF  (enum decode_type_t)201
+
 typedef struct {
     const char *cell_name;
     decode_type_t IRType;
@@ -13,8 +17,6 @@ typedef const struct {
     uint8_t rows;
     uint8_t cols;
     const Touch_IRcode_t *IR_cells;
-    // Touch_BLEKeycode_t
-    // Touch_MQTT_T
 } Touch_Page_t;
 
 const Touch_IRcode_t XBox_Cells[15][3] = {
@@ -50,9 +52,9 @@ const Touch_IRcode_t XBox_Cells[15][3] = {
     },
     // Row 5
     {
-        {"Y (Yellow)", NEC, 0x11BE619, 32, 0, 3},
-        {},
-        {}
+        {"Wall Power Off", WALL_POWER_OFF, 0, 0},
+        {"Y (Yellow)", NEC, 0x11BE619, 32},
+        {"Wall Power On", WALL_POWER_ON, 0, 0}
     },
     // Row 6
     {
@@ -70,6 +72,7 @@ const Touch_IRcode_t XBox_Cells[15][3] = {
     {
         {"Sound Power", NEC, 0x10EF08F7, 32},       // Logitech speakers
         {"TV Power", NEC, 0x20DF10EF, 32},          // Vizio TV
+        {"Wall Power On", WALL_POWER_ON, 0, 0}
     },
     // Row 9
     {

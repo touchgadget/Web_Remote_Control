@@ -64,12 +64,18 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 WebServer server(80);
 #endif  // ESP32
 MDNSResponder mdns;
-WiFiClient espClient;
 WiFiManager wifiManager;
+
+#include <PubSubClient.h>
+const char mqtt_server[] = "raspi2";
+
+WiFiClient espClient;
+PubSubClient mqttClient(espClient);
 
 // ESP GPIO pin to use. Recommended: 4 (D2).
 IRsend irsend(4); // Set the GPIO to be used to sending the message.
 
+// mDSN hostname is webremote.local
 #define HOSTNAME "WebRemote"
 
 void handleRoot(void){
@@ -136,8 +142,16 @@ void sendIRcode(Touch_Page_t &page, uint8_t row, uint8_t col)
   }
   Touch_IRcode_t *ir = (Touch_IRcode_t *)page.IR_cells + ((row * page.cols) + col);
   Dbg_printf("type= %d code= 0x%llx\n", ir->IRType, ir->IRCode);
-  if (!irsend.send(ir->IRType, ir->IRCode, ir->nbits, ir->repeat)) {
-    Dbg_println(F("sendIRCode fail"));
+  if (ir->IRType == WALL_POWER_ON) {
+    mqttClient.publish("x10/A1", "On");
+  }
+  else if (ir->IRType == WALL_POWER_OFF) {
+    mqttClient.publish("x10/A1", "Off");
+  }
+  else if (ir->IRType == NEC) {
+    if (!irsend.send(ir->IRType, ir->IRCode, ir->nbits, ir->repeat)) {
+      Dbg_println(F("sendIRCode fail"));
+    }
   }
 }
 
@@ -221,6 +235,29 @@ void setup()
   server.on("/", handleRoot);
   server.onNotFound(handleNotFound);
   server.begin();
+
+  // Setup MQTT broker/server
+  mqttClient.setServer(mqtt_server, 1883);
+}
+
+void reconnect() {
+  // Loop until we're reconnected
+  while (!mqttClient.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Create a random client ID
+    String clientId = "ESP8266Client-";
+    clientId += String(random(0xffff), HEX);
+    // Attempt to connect
+    if (mqttClient.connect(clientId.c_str())) {
+      Serial.println("connected");
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(mqttClient.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
 }
 
 void loop()
@@ -228,6 +265,12 @@ void loop()
 #if defined(ESP8266)
   mdns.update();
 #endif
+  if (!mqttClient.connected()) {
+    reconnect();
+  }
+  else {
+    mqttClient.loop();
+  }
   webSocket.loop();
   server.handleClient();
 }
